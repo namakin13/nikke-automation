@@ -3,89 +3,75 @@ chcp 65001 > nul
 cd /d "%~dp0"
 
 echo ================================================
-echo  NIKKE Automation - ビルド
+echo  NIKKE Automation - Build
 echo ================================================
 echo.
 
-REM ── 仮想環境 ──
 if not exist .venv (
-    echo [エラー] .venv が見つかりません。先に setup.bat を実行してください。
+    echo [ERROR] .venv not found. Run setup.bat first.
     pause
     exit /b 1
 )
 call .venv\Scripts\activate.bat
 
-REM ── 依存パッケージのインストール ──
-echo [1/4] ビルド依存パッケージをインストール中...
+echo [1/4] Installing build dependencies...
 pip install customtkinter pyinstaller Pillow --quiet
 if errorlevel 1 (
-    echo [エラー] pip install 失敗
+    echo [ERROR] pip install failed
     pause
     exit /b 1
 )
 
-REM ── アイコン生成 ──
 echo.
-echo [2/4] アイコンを生成中...
+echo [2/4] Generating icon...
 python create_icon.py
 if errorlevel 1 (
-    echo [エラー] アイコン生成失敗
+    echo [ERROR] Icon generation failed
     pause
     exit /b 1
 )
 
-REM ── PyInstaller でビルド ──
 echo.
-echo [3/4] PyInstaller でビルド中...
+echo [3/4] Building with PyInstaller...
 pyinstaller nikke_automation.spec --clean --noconfirm
 if errorlevel 1 (
-    echo [エラー] PyInstaller ビルド失敗
+    echo [ERROR] PyInstaller build failed
     pause
     exit /b 1
 )
 
 echo.
-echo ビルド完了: dist\NikkeAutomation\NikkeAutomation.exe
+echo Build complete: dist\NikkeAutomation\NikkeAutomation.exe
 
-REM ── ショートカット作成 ──
 echo.
-echo ショートカットを作成中...
-powershell -ExecutionPolicy Bypass -Command ^
-    "$ws = New-Object -ComObject WScript.Shell; ^
-     $s = $ws.CreateShortcut('%~dp0dist\NIKKE Automation.lnk'); ^
-     $s.TargetPath = '%~dp0dist\NikkeAutomation\NikkeAutomation.exe'; ^
-     $s.WorkingDirectory = '%~dp0dist\NikkeAutomation'; ^
-     $s.IconLocation = '%~dp0dist\NikkeAutomation\NikkeAutomation.exe,0'; ^
-     $s.Description = 'NIKKE Automation Tool'; ^
-     $s.Save()"
+echo Creating shortcut...
+powershell -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%~dp0dist\NIKKE Automation.lnk'); $s.TargetPath = '%~dp0dist\NikkeAutomation\NikkeAutomation.exe'; $s.WorkingDirectory = '%~dp0dist\NikkeAutomation'; $s.IconLocation = '%~dp0dist\NikkeAutomation\NikkeAutomation.exe,0'; $s.Description = 'NIKKE Automation Tool'; $s.Save()"
 if errorlevel 1 (
-    echo [警告] ショートカット作成に失敗しました
+    echo [WARN] Shortcut creation failed
 ) else (
-    echo ショートカット作成完了: dist\NIKKE Automation.lnk
+    echo Shortcut created: dist\NIKKE Automation.lnk
 )
 
-REM ── Inno Setup でインストーラーを生成（任意） ──
 echo.
-echo [4/4] Inno Setup でインストーラーを生成中...
+echo [4/4] Generating installer with Inno Setup...
 set ISCC_PATH="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 if exist %ISCC_PATH% (
     %ISCC_PATH% installer.iss
     if errorlevel 1 (
-        echo [警告] Inno Setup でのインストーラー生成に失敗しました
+        echo [WARN] Inno Setup installer generation failed
     ) else (
-        echo インストーラー生成完了: dist\NikkeAutomation_Setup.exe
+        echo Installer created: dist\NikkeAutomation_Setup.exe
     )
 ) else (
-    echo [情報] Inno Setup が見つかりません（インストール不要の場合はスキップ可）
-    echo       インストーラーを生成する場合は https://jrsoftware.org/isdl.php から
-    echo       Inno Setup 6 をインストールしてください。
+    echo [INFO] Inno Setup not found. Skipping installer.
+    echo       Download from https://jrsoftware.org/isdl.php if needed.
 )
 
 echo.
 echo ================================================
-echo  完了！
-echo   実行ファイル : dist\NikkeAutomation\NikkeAutomation.exe
-echo   インストーラー: dist\NikkeAutomation_Setup.exe (生成された場合)
+echo  Done!
+echo   Executable : dist\NikkeAutomation\NikkeAutomation.exe
+echo   Installer  : dist\NikkeAutomation_Setup.exe (if generated)
 echo ================================================
 echo.
 pause
