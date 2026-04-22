@@ -114,14 +114,18 @@ class TaskRunner:
     # ──────────────────────────────────────────
 
     def _load_tasks(self, include_disabled: bool = False) -> list[dict]:
-        """tasks.yaml からタスク定義を読み込む。"""
+        """tasks.yaml からタスク定義を読み込む。YAML 解析や I/O エラーを捕捉して空リストを返す。"""
         config_path = Path(self._tasks_config_path)
         if not config_path.exists():
             logger.error("tasks.yaml が見つかりません: %s", config_path)
             return []
 
-        with config_path.open(encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+        try:
+            with config_path.open(encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("tasks.yaml の読み込みに失敗しました: %s", config_path)
+            return []
 
         all_tasks: list[dict] = data.get("tasks", [])
 
