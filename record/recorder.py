@@ -116,6 +116,16 @@ class EventRecorder:
         mouse_listener.start()
         keyboard_listener.start()
 
+        # pynput 起動直後に残留キーイベントを拾わないようインターバルを置く
+        time.sleep(0.5)
+        # sleep 中に積まれた不要イベントを破棄
+        while not self._event_queue.empty():
+            try:
+                self._event_queue.get_nowait()
+            except queue.Empty:
+                break
+        self._stop_flag = False  # sleep 中にセットされた可能性をリセット
+
         try:
             self._main_loop()
         finally:
@@ -151,19 +161,25 @@ class EventRecorder:
             except queue.Empty:
                 continue
 
-            if isinstance(raw, _RawClickEvent):
-                self._process_click(raw)
-            elif isinstance(raw, _RawKeyEvent):
-                self._process_key(raw)
+            try:
+                if isinstance(raw, _RawClickEvent):
+                    self._process_click(raw)
+                elif isinstance(raw, _RawKeyEvent):
+                    self._process_key(raw)
+            except Exception as exc:
+                logger.error("イベント処理中にエラーが発生しました（記録は継続）: %s", exc, exc_info=True)
 
         # フラグが立った後もキューに残ったイベントを処理する
         while not self._event_queue.empty():
             try:
                 raw = self._event_queue.get_nowait()
-                if isinstance(raw, _RawClickEvent):
-                    self._process_click(raw)
-                elif isinstance(raw, _RawKeyEvent):
-                    self._process_key(raw)
+                try:
+                    if isinstance(raw, _RawClickEvent):
+                        self._process_click(raw)
+                    elif isinstance(raw, _RawKeyEvent):
+                        self._process_key(raw)
+                except Exception as exc:
+                    logger.error("終了時イベント処理エラー: %s", exc)
             except queue.Empty:
                 break
 
