@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
+import time
 from pathlib import Path
 from tkinter import messagebox
 from typing import Optional
@@ -358,8 +359,10 @@ class NikkeAutomationApp(ctk.CTk):
 
         self._set_state(self.RECORDING)
         self._append_log(f"記録開始: {name}  （停止: F9 または「■ 停止」ボタン）")
+        self._rec_start_time = time.time()
 
         def _worker() -> None:
+            import traceback as _tb
             try:
                 from record.recorder import EventRecorder
                 from record.template_extractor import TemplateExtractor
@@ -386,7 +389,11 @@ class NikkeAutomationApp(ctk.CTk):
                 recorder.start()  # ブロッキング
 
             except Exception as exc:
-                self.after(0, lambda: self._append_log(f"[エラー] 記録失敗: {exc}"))
+                detail = _tb.format_exc()
+                self.after(0, lambda d=detail, e=exc: (
+                    self._append_log(f"[エラー] 記録失敗: {e}"),
+                    self._append_log(f"[詳細]\n{d}"),
+                ))
             finally:
                 self.after(0, self._on_rec_done)
 
@@ -398,10 +405,17 @@ class NikkeAutomationApp(ctk.CTk):
             self._recorder.stop_external()
 
     def _on_rec_done(self) -> None:
+        elapsed = time.time() - getattr(self, "_rec_start_time", 0)
         self._recorder = None
         self._set_state(self.IDLE)
         self._refresh_recordings()
-        self._append_log("記録が完了しました")
+        if elapsed < 3.0:
+            self._append_log(
+                f"[警告] 記録が {elapsed:.1f}s で終了しました。"
+                f"上のログにエラー詳細が表示されていれば確認してください。"
+            )
+        else:
+            self._append_log(f"記録が完了しました（{elapsed:.1f}s）")
 
     # ──────────────────────────────────────────
     # 再生

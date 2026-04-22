@@ -263,6 +263,7 @@ class EventRecorder:
 
     def _on_key_press(self, key) -> None:
         key_str = pynput_key_to_str(key)
+        logger.debug("[pynput] key_press raw=%s -> key_str=%s", key, key_str)
         if key_str is None:
             return
         # 停止キー検出
