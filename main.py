@@ -38,13 +38,21 @@ from utils.logger import setup_logger, get_logger
 # ──────────────────────────────────────────────────────────────
 
 def load_settings(path: str = "config/settings.yaml") -> dict:
-    """設定ファイルを読み込む。"""
+    """設定ファイルを読み込む。ファイル読み込みや YAML 解析エラーを捕捉して空設定を返す。"""
     config_path = Path(path)
+    logger = get_logger()
+
     if not config_path.exists():
-        print(f"[警告] 設定ファイルが見つかりません: {path}。デフォルト設定を使用します。")
+        logger.warning("設定ファイルが見つかりません: %s。デフォルト設定を使用します。", path)
         return {}
-    with config_path.open(encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+
+    try:
+        with config_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+            return data
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("設定ファイルの読み込みに失敗しました: %s", path)
+        return {}
 
 
 # ──────────────────────────────────────────────────────────────
