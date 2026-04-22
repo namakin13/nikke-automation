@@ -100,6 +100,11 @@ class EventRecorder:
         logger.info("記録モード開始: '%s'", self._name)
         logger.info("  停止キー: %s", self._stop_key.upper())
         logger.info("  保存先: %s", self._output_dir)
+        if rect:
+            logger.info("  ウィンドウ矩形: L%d T%d R%d B%d (%dx%d)",
+                        rect.left, rect.top, rect.right, rect.bottom, window_w, window_h)
+        else:
+            logger.warning("  ウィンドウ矩形: 取得失敗（クリックが全てスキップされます）")
         logger.info("=" * 50)
 
         self._start_time = time.time()
@@ -197,7 +202,14 @@ class EventRecorder:
 
         rel_pos = self._abs_to_rel(raw.abs_x, raw.abs_y)
         if rel_pos is None:
-            logger.debug("ウィンドウ外クリックをスキップ: abs=(%d,%d)", raw.abs_x, raw.abs_y)
+            rect = self._window.get_rect()
+            if rect is None:
+                logger.warning("ウィンドウ矩形を取得できませんでした（hwnd が無効の可能性）")
+            else:
+                logger.warning(
+                    "ウィンドウ外クリックをスキップ: click=(%d,%d)  window=L%d T%d R%d B%d",
+                    raw.abs_x, raw.abs_y, rect.left, rect.top, rect.right, rect.bottom,
+                )
             return
 
         rel_x, rel_y = rel_pos

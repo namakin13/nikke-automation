@@ -88,6 +88,17 @@ class EventPlayer:
                     recording.meta.window_width, recording.meta.window_height)
         logger.info("=" * 50)
 
+        if not recording.events:
+            logger.warning("イベントが 0 件です。記録時にウィンドウ外をクリックしていた可能性があります。")
+            return PlayResult()
+
+        # ── 再生前にゲームウィンドウをフォーカス ──
+        logger.info("ゲームウィンドウをフォーカスします...")
+        focused = self._window.focus()
+        if not focused:
+            logger.warning("ウィンドウのフォーカスに失敗しました。クリックが意図しない場所に当たる可能性があります。")
+        time.sleep(2.0)  # フォーカス後の画面遷移待機
+
         result = PlayResult(total_events=len(recording.events))
         start_time = time.time()
         prev_ts = 0.0
@@ -183,8 +194,9 @@ class EventPlayer:
     # ──────────────────────────────────────────
 
     def _wait_interval(self, current_ts: float, prev_ts: float) -> None:
-        """イベント間の待機（speed 倍率を適用）。"""
+        """イベント間の待機（speed 倍率を適用）。最大 30s にキャップ。"""
         duration = (current_ts - prev_ts) / self._speed
+        duration = min(duration, 30.0)
         if duration > 0.05:
             time.sleep(duration)
 

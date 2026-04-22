@@ -66,7 +66,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    uac_admin=False,
+    uac_admin=True,   # NIKKE が管理者権限で動作するためフック取得に必要
 )
 
 coll = COLLECT(
