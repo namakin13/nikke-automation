@@ -317,6 +317,9 @@ class EventRecorder:
 
     def _save_recording(self, recording: Recording) -> None:
         json_path = self._output_dir / "recording.json"
-        with json_path.open("w", encoding="utf-8") as f:
-            json.dump(recording.to_dict(), f, ensure_ascii=False, indent=2)
-        logger.info("記録を保存しました: %s", json_path)
+        try:
+            with json_path.open("w", encoding="utf-8") as f:
+                json.dump(recording.to_dict(), f, ensure_ascii=False, indent=2)
+            logger.info("記録を保存しました: %s", json_path)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("記録ファイルの保存に失敗しました: %s", json_path)
