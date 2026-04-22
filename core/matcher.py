@@ -77,15 +77,20 @@ class TemplateMatcher:
             # confidence=-1.0 でファイル未存在/読み込み失敗を閾値未満(0.0)と区別する
             return MatchResult(found=False, template_path=str(template_path), confidence=-1.0)
 
-        if grayscale:
-            src = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-            tpl = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY) if len(template.shape) == 3 else template
-        else:
-            src = screenshot
-            tpl = template
+        try:
+            if grayscale:
+                src = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+                tpl = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY) if len(template.shape) == 3 else template
+            else:
+                src = screenshot
+                tpl = template
 
-        result = cv2.matchTemplate(src, tpl, cv2.TM_CCOEFF_NORMED)
-        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+            result = cv2.matchTemplate(src, tpl, cv2.TM_CCOEFF_NORMED)
+            _, max_val, _, max_loc = cv2.minMaxLoc(result)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("テンプレートマッチングに失敗しました: %s", exc)
+            # confidence=-2.0 は内部エラーを示す特殊値
+            return MatchResult(found=False, template_path=str(template_path), confidence=-2.0)
 
         if max_val < thr:
             logger.debug(
@@ -134,29 +139,33 @@ class TemplateMatcher:
         if template is None:
             return []
 
-        if grayscale:
-            src = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-            tpl = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY) if len(template.shape) == 3 else template
-        else:
-            src = screenshot
-            tpl = template
+        try:
+            if grayscale:
+                src = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+                tpl = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY) if len(template.shape) == 3 else template
+            else:
+                src = screenshot
+                tpl = template
 
-        result = cv2.matchTemplate(src, tpl, cv2.TM_CCOEFF_NORMED)
-        h, w = tpl.shape[:2]
+            result = cv2.matchTemplate(src, tpl, cv2.TM_CCOEFF_NORMED)
+            h, w = tpl.shape[:2]
 
-        locations = np.where(result >= thr)
-        matches: list[MatchResult] = []
+            locations = np.where(result >= thr)
+            matches: list[MatchResult] = []
 
-        for pt in zip(*locations[::-1]):
-            matches.append(
-                MatchResult(
-                    found=True,
-                    center_x=pt[0] + w // 2,
-                    center_y=pt[1] + h // 2,
-                    confidence=float(result[pt[1], pt[0]]),
-                    template_path=str(template_path),
+            for pt in zip(*locations[::-1]):
+                matches.append(
+                    MatchResult(
+                        found=True,
+                        center_x=pt[0] + w // 2,
+                        center_y=pt[1] + h // 2,
+                        confidence=float(result[pt[1], pt[0]]),
+                        template_path=str(template_path),
+                    )
                 )
-            )
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("テンプレート複数検索に失敗しました: %s", exc)
+            return []
 
         # 重複排除（NMS的処理）
         return self._non_max_suppress(matches, min_distance=w // 2)
