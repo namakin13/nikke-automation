@@ -77,8 +77,12 @@ class EventPlayer:
             logger.error("recording.json が見つかりません: %s", json_path)
             return PlayResult()
 
-        with json_path.open(encoding="utf-8") as f:
-            recording = Recording.from_dict(json.load(f))
+        try:
+            with json_path.open(encoding="utf-8") as f:
+                recording = Recording.from_dict(json.load(f))
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("recording.json の読み込みに失敗しました: %s", json_path)
+            return PlayResult()
 
         logger.info("=" * 50)
         logger.info("再生モード開始: '%s'", self._name)
