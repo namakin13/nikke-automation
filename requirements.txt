@@ -1,0 +1,24 @@
+# NIKKE Automation - Dependencies
+# pip install -r requirements.txt
+
+# Screen capture
+mss>=9.0.1
+
+# Image processing / template matching
+opencv-python>=4.9.0
+numpy>=1.26.0
+
+# Mouse / keyboard control
+pyautogui>=0.9.54
+
+# Input event recording (record/replay feature)
+pynput>=1.7.6
+
+# Windows API (window detection)
+pywin32>=306
+
+# Config file
+PyYAML>=6.0.1
+
+# Code quality
+ruff>=0.4.0

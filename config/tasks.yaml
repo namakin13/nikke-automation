@@ -1,0 +1,70 @@
+# NIKKE Automation - タスク定義ファイル
+# enabled: true にしたタスクのみ実行される
+
+tasks:
+  # ─────────────────────────────────────────
+  # ログインボーナス受け取り
+  # ─────────────────────────────────────────
+  - id: login_bonus
+    name: "ログインボーナス受け取り"
+    enabled: true
+    order: 1
+    module: tasks.login_bonus
+    class: LoginBonusTask
+    config:
+      # 一括受け取りボタンのテンプレート
+      collect_all_template: assets/templates/login_bonus/collect_all_button.png
+      close_template: assets/templates/common/close_button.png
+      login_icon_template: assets/templates/login_bonus/login_bonus_icon.png
+      reward_animation_wait: 3.0
+
+  # ─────────────────────────────────────────
+  # シミュレーション室（ルーティンバトル）
+  # ─────────────────────────────────────────
+  - id: simulation_room
+    name: "シミュレーション室 自動進行"
+    enabled: true
+    order: 2
+    module: tasks.routine_battle
+    class: SimulationRoomTask
+    config:
+      # 1日あたりの最大バトル回数（0=無制限）
+      max_battles: 3
+      auto_repeat: true
+      simulation_icon_template: assets/templates/navigation/simulation_room_icon.png
+      start_button_template: assets/templates/battle/start_button.png
+      auto_button_template: assets/templates/battle/auto_button.png
+      battle_result_template: assets/templates/battle/battle_result.png
+      collect_template: assets/templates/battle/collect_button.png
+      next_button_template: assets/templates/battle/next_button.png
+      close_template: assets/templates/common/close_button.png
+
+  # ─────────────────────────────────────────
+  # 前哨基地（アウトポスト）防衛報酬回収
+  # ─────────────────────────────────────────
+  - id: outpost_reward
+    name: "前哨基地 報酬回収"
+    enabled: true
+    order: 3
+    module: tasks.routine_battle
+    class: OutpostTask
+    config:
+      outpost_icon_template: assets/templates/navigation/outpost_icon.png
+      collect_template: assets/templates/battle/collect_button.png
+      close_template: assets/templates/common/close_button.png
+
+  # ─────────────────────────────────────────
+  # 部族タワー（デイリー挑戦）
+  # ─────────────────────────────────────────
+  - id: tribe_tower
+    name: "部族タワー デイリー挑戦"
+    enabled: false   # 初期は無効（設定完了後に有効化）
+    order: 4
+    module: tasks.tribe_tower
+    class: TribeTowerTask
+    config:
+      max_attempts: 3
+      tower_icon_template: assets/templates/navigation/tribe_tower_icon.png
+      challenge_button_template: assets/templates/battle/challenge_button.png
+      auto_clear_template: assets/templates/battle/auto_clear_button.png
+      result_template: assets/templates/battle/battle_result.png

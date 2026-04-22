@@ -1,0 +1,68 @@
+# NIKKE Automation - 設定ファイル
+
+# ゲームウィンドウ設定
+window:
+  # ウィンドウタイトルの候補（部分一致）
+  title_candidates:
+    - "GODDESS OF VICTORY: NIKKE"
+    - "NIKKE"
+  # キャプチャ時に内枠を除くマージン（px）
+  capture_margin: 0
+
+# テンプレートマッチング設定
+matching:
+  # デフォルトマッチング閾値（0.0〜1.0）
+  default_threshold: 0.80
+  # アサーション用の高精度閾値
+  assert_threshold: 0.85
+  # 最大リトライ回数
+  max_retries: 5
+  # リトライ間隔（秒）
+  retry_interval: 1.5
+  # 要素待機タイムアウト（秒）
+  wait_timeout: 30
+
+# 操作タイミング設定
+timing:
+  # クリック後の待機（秒）
+  after_click: 0.8
+  # 画面遷移待機（秒）
+  screen_transition: 2.0
+  # 長押し時間（秒）
+  long_press: 1.0
+  # バトル完了待機（秒）
+  battle_wait: 5.0
+  # 報酬アニメーション待機（秒）
+  reward_animation: 3.0
+
+# ログ設定
+logging:
+  level: INFO          # DEBUG / INFO / WARNING / ERROR
+  log_dir: logs
+  screenshot_on_error: true
+  screenshot_dir: logs/screenshots
+
+# スクリーンショット保存設定
+screenshot:
+  save_dir: logs/screenshots
+  format: png
+
+# 操作記録設定
+recording:
+  # 記録の保存先ディレクトリ
+  output_dir: recordings
+  # テンプレート切り出し時のパディング（px）。小さいと認識精度低下、大きいと他UI要素が混入
+  template_padding: 30
+  # クリック直前のスクリーンショットを保存するか（デバッグ用、容量注意）
+  save_click_screenshot: true
+  # 記録停止キー（f9 / f8 など）
+  stop_key: f9
+
+# 再生設定
+playback:
+  # テンプレートが見つからない場合に記録座標へフォールバックするか
+  allow_fallback: true
+  # テンプレートマッチング閾値（null で matching.default_threshold を使用）
+  template_threshold: null
+  # ウィンドウサイズが変わった場合にフォールバック座標をスケール補正するか
+  scale_coords: true
