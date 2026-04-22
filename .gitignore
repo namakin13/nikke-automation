@@ -30,3 +30,8 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# PyInstaller ビルド成果物
+build/
+dist/
+*.spec.bak

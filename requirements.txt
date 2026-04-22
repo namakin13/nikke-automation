@@ -20,5 +20,14 @@ pywin32>=306
 # Config file
 PyYAML>=6.0.1
 
+# GUI
+customtkinter>=5.2.2
+
+# Icon generation
+Pillow>=10.0.0
+
 # Code quality
 ruff>=0.4.0
+
+# Build only (not needed at runtime)
+# pyinstaller>=6.5.0

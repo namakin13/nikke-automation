@@ -276,6 +276,16 @@ class EventRecorder:
             return None
         return rect.rel_point(abs_x, abs_y)
 
+    def stop_external(self) -> None:
+        """GUI ボタン等の外部スレッドから記録を停止する。
+
+        スレッドセーフ: _stop_flag は GIL 保護下の bool 代入のため追加ロック不要。
+        呼び出し後、_main_loop は次の 50ms ポーリングサイクルで終了する。
+        """
+        if not self._stop_flag:
+            logger.info("外部から停止要求を受け付けました。記録を終了します...")
+            self._stop_flag = True
+
     def _save_recording(self, recording: Recording) -> None:
         json_path = self._output_dir / "recording.json"
         with json_path.open("w", encoding="utf-8") as f:
